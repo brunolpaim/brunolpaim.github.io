@@ -1,0 +1,232 @@
+<html><head><base href="html"></base>
+<meta charset="UTF-8">
+<title>Omni Akashica - Tarô Luz e Sombra</title>
+<style>
+:root {
+  --primary: #2c1810;
+  --secondary: #8b4513;
+  --accent: #daa520;
+  --light: #f5e6d3;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  min-height: 100vh;
+  background: var(--primary);
+  color: var(--light);
+  font-family: 'Georgia', serif;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+h1 {
+  color: var(--accent);
+  font-size: 2.5em;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  margin-bottom: 30px;
+}
+
+.deck {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.card {
+  position: relative;
+  width: 150px;
+  height: 250px;
+  perspective: 1000px;
+  cursor: pointer;
+  margin: 0 auto;
+}
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.card.flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-front, .card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.card-front {
+  background: linear-gradient(135deg, var(--secondary), var(--primary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--accent);
+}
+
+.card-back {
+  background: white;
+  transform: rotateY(180deg);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.card-title {
+  font-size: 0.8em;
+  color: var(--primary);
+  margin-top: 10px;
+}
+
+.back-pattern {
+  width: 100%;
+  height: 100%;
+}
+
+.controls {
+  margin: 20px 0;
+}
+
+button {
+  background: var(--accent);
+  color: var(--primary);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1.1em;
+  margin: 0 10px;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background: var(--light);
+  transform: translateY(-2px);
+}
+
+.reading-area {
+  margin-top: 30px;
+  padding: 20px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  display: none;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Omni Akashica - Tarô Luz e Sombra</h1>
+  
+  <div class="controls">
+    <button onclick="shuffleCards()">Embaralhar</button>
+    <!--<button onclick="startReading()">Nova Leitura</button>-->
+  </div>
+  
+  <div class="deck" id="deck"></div>
+  
+  <div class="reading-area" id="readingArea">
+    <h2>Sua Leitura</h2>
+    <div id="reading"></div>
+  </div>
+</div>
+
+<script>
+const tarotCards = [
+    { name: "Luz Azul", number: 1, suit: "Tarô Luz e Sombra", img: "taroluzesombra/luzazul.png" },
+    { name: "Luz Branca", number: 2, suit: "Tarô Luz e Sombra", img: "taroluzesombra/luzbranca.png" },
+    { name: "Luz Dourada", number: 3, suit: "Tarô Luz e Sombra", img: "taroluzesombra/luzdourada.png" },
+    { name: "Luz Rosa", number: 4, suit: "Tarô Luz e Sombra", img: "taroluzesombra/luzrosa.png" },
+    { name: "Luz Verde", number: 5, suit: "Tarô Luz e Sombra", img: "taroluzesombra/luzverde.png" },
+    { name: "Luz Vermelha", number: 6, suit: "Tarô Luz e Sombra", img: "taroluzesombra/luzvermelha.png" },
+    { name: "Luz Violeta", number: 7, suit: "Tarô Luz e Sombra", img: "taroluzesombra/luzvioleta.png" },
+    { name: "Sombra Azul", number: 8, suit: "Tarô Luz e Sombra", img: "taroluzesombra/sombraazul.png" },
+    { name: "Sombra Branca", number: 9, suit: "Tarô Luz e Sombra", img: "taroluzesombra/sombrabranca.png" },
+    { name: "Sombra Dourada", number: 10, suit: "Tarô Luz e Sombra", img: "taroluzesombra/sombradourada.png" },
+    { name: "Sombra Rosa", number: 11, suit: "Tarô Luz e Sombra", img: "taroluzesombra/sombrarosa.png" },
+    { name: "Sombra Verde", number: 12, suit: "Tarô Luz e Sombra", img: "taroluzesombra/sombraverde.png" },
+    { name: "Sombra Vermelha", number: 13, suit: "Tarô Luz e Sombra", img: "taroluzesombra/sombravermelha.png" },
+    { name: "Sombra Violeta", number: 14, suit: "Tarô Luz e Sombra", img: "taroluzesombra/sombravioleta.png" },
+  // ... adicione todas as cartas aqui
+];
+
+let deck = [...tarotCards];
+
+function createCard(card) {
+  const cardDiv = document.createElement('div');
+  cardDiv.className = 'card';
+  cardDiv.innerHTML = `
+    <div class="card-inner">
+      <div class="card-front">
+        <img src="versotarot.png" alt="Carta verso">
+      </div>
+      <div class="card-back">
+        <img src="${card.img}" alt="${card.name} - Carta de Tarô" class="card-img">
+        <div class="card-title">${card.name}</div>
+      </div>
+    </div>
+  `;
+  
+  cardDiv.addEventListener('click', () => flipCard(cardDiv));
+  return cardDiv;
+}
+
+function flipCard(card) {
+  card.classList.toggle('flipped');
+}
+
+function shuffleCards() {
+  const deckElement = document.getElementById('deck');
+  deck = [...tarotCards].sort(() => Math.random() - 0.5);
+  deckElement.innerHTML = '';
+  deck.forEach(card => {
+    deckElement.appendChild(createCard(card));
+  });
+}
+
+function startReading() {
+  const readingArea = document.getElementById('readingArea');
+  readingArea.style.display = 'block';
+  const reading = document.getElementById('reading');
+  reading.innerHTML = '';
+  
+  // Seleciona o número de cartas aleatórias para uma leitura básica
+  const selectedCards = deck.slice(0, 78);
+  selectedCards.forEach((card, index) => {
+    const position = ['Passado', 'Presente', 'Futuro'][index];
+    reading.innerHTML += `
+      <div style="margin: 20px 0;">
+        <h3>${position}: ${card.name}</h3>
+        <img src="${card.img}" alt="${card.name}" style="width: 150px; height: 250px; object-fit: contain;">
+      </div>
+    `;
+  });
+}
+
+// Inicializa o deck
+document.addEventListener('DOMContentLoaded', () => {
+  shuffleCards();
+});
+</script>
+</body>
+</html>

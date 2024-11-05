@@ -1,0 +1,296 @@
+<html><head><base href="html"></base>
+<meta charset="UTF-8">
+<title>Omni Akashica - TarôX</title>
+<style>
+:root {
+  --primary: #2c1810;
+  --secondary: #8b4513;
+  --accent: #daa520;
+  --light: #f5e6d3;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  min-height: 100vh;
+  background: var(--primary);
+  color: var(--light);
+  font-family: 'Georgia', serif;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+h1 {
+  color: var(--accent);
+  font-size: 2.5em;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  margin-bottom: 30px;
+}
+
+.deck {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.card {
+  position: relative;
+  width: 150px;
+  height: 250px;
+  perspective: 1000px;
+  cursor: pointer;
+  margin: 0 auto;
+}
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.card.flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-front, .card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.card-front {
+  background: linear-gradient(135deg, var(--secondary), var(--primary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--accent);
+}
+
+.card-back {
+  background: white;
+  transform: rotateY(180deg);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.card-title {
+  font-size: 0.8em;
+  color: var(--primary);
+  margin-top: 10px;
+}
+
+.back-pattern {
+  width: 100%;
+  height: 100%;
+}
+
+.controls {
+  margin: 20px 0;
+}
+
+button {
+  background: var(--accent);
+  color: var(--primary);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1.1em;
+  margin: 0 10px;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background: var(--light);
+  transform: translateY(-2px);
+}
+
+.reading-area {
+  margin-top: 30px;
+  padding: 20px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  display: none;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Omni Akashica - TarôX</h1>
+  
+  <div class="controls">
+    <button onclick="shuffleCards()">Embaralhar</button>
+    <!--<button onclick="startReading()">Nova Leitura</button>-->
+  </div>
+  
+  <div class="deck" id="deck"></div>
+  
+  <div class="reading-area" id="readingArea">
+    <h2>Sua Leitura</h2>
+    <div id="reading"></div>
+  </div>
+</div>
+
+<script>
+const tarotCards = [
+    { name: "O Louco", number: 0, suit: "Arcanos Maiores", img: "tarox/00_TarotX.png" },
+    { name: "O Mago", number: 1, suit: "Arcanos Maiores", img: "tarox/01_TarotX.png" },
+    { name: "A Sacerdotisa", number: 2, suit: "Arcanos Maiores", img: "tarox/02_TarotX.png" },
+    { name: "A Imperatriz", number: 3, suit: "Arcanos Maiores", img: "tarox/03_TarotX.png" },
+    { name: "O Imperador", number: 4, suit: "Arcanos Maiores", img: "tarox/04_TarotX.png" },
+    { name: "O Hierofante", number: 5, suit: "Arcanos Maiores", img: "tarox/05_TarotX.png" },
+    { name: "Os Enamorados", number: 6, suit: "Arcanos Maiores", img: "tarox/06_TarotX.png" },
+    { name: "O Carro", number: 7, suit: "Arcanos Maiores", img: "tarox/07_TarotX.png" },
+    { name: "A Justiça", number: 8, suit: "Arcanos Maiores", img: "tarox/08_TarotX.png" },
+    { name: "O Eremita", number: 9, suit: "Arcanos Maiores", img: "tarox/09_TarotX.png" },
+    { name: "A Roda da Fortuna", number: 10, suit: "Arcanos Maiores", img: "tarox/10_TarotX.png" },
+    { name: "a Força", number: 11, suit: "Arcanos Maiores", img: "tarox/11_TarotX.png" },
+    { name: "O Enforcado", number: 12, suit: "Arcanos Maiores", img: "tarox/12_TarotX.png" },
+    { name: "A Morte", number: 13, suit: "Arcanos Maiores", img: "tarox/13_TarotX.png" },
+    { name: "A temperança", number: 14, suit: "Arcanos Maiores", img: "tarox/14_TarotX.png" },
+    { name: "O Diabo", number: 15, suit: "Arcanos Maiores", img: "tarox/15_TarotX.png" },
+    { name: "A Torre", number: 16, suit: "Arcanos Maiores", img: "tarox/16_TarotX.png" },
+    { name: "A Estrela", number: 17, suit: "Arcanos Maiores", img: "tarox/17_TarotX.png" },
+    { name: "A Lua", number: 18, suit: "Arcanos Maiores", img: "tarox/18_TarotX.png" },
+    { name: "O Sol", number: 19, suit: "Arcanos Maiores", img: "tarox/19_TarotX.png" },
+    { name: "O Julgamento", number: 20, suit: "Arcanos Maiores", img: "tarox/20_TarotX.png" },
+    { name: "O Mundo", number: 21, suit: "Arcanos Maiores", img: "tarox/21_TarotX.png" },
+    { name: "1 de copas", number: 22, suit: "Arcanos Menores", img: "tarox/01copas_TarotX.png" },
+    { name: "2 de copas", number: 23, suit: "Arcanos Menores", img: "tarox/02copas_TarotX.png" },
+    { name: "3 de copas", number: 24, suit: "Arcanos Menores", img: "tarox/03copas_TarotX.png" },
+    { name: "4 de copas", number: 25, suit: "Arcanos Menores", img: "tarox/04copas_TarotX.png" },
+    { name: "5 de copas", number: 26, suit: "Arcanos Menores", img: "tarox/05copas_TarotX.png" },
+    { name: "6 de copas", number: 27, suit: "Arcanos Menores", img: "tarox/06copas_TarotX.png" },
+    { name: "7 de copas", number: 28, suit: "Arcanos Menores", img: "tarox/07copas_TarotX.png" },
+    { name: "8 de copas", number: 29, suit: "Arcanos Menores", img: "tarox/08copas_TarotX.png" },
+    { name: "9 de copas", number: 30, suit: "Arcanos Menores", img: "tarox/09copas_TarotX.png" },
+    { name: "10 de copas", number: 31, suit: "Arcanos Menores", img: "tarox/10copas_TarotX.png" },
+    { name: "11 de copas", number: 32, suit: "Arcanos Menores", img: "tarox/11copas_TarotX.png" },
+    { name: "12 de copas", number: 33, suit: "Arcanos Menores", img: "tarox/12copas_TarotX.png" },
+    { name: "13 de copas", number: 34, suit: "Arcanos Menores", img: "tarox/13copas_TarotX.png" },
+    { name: "14 de copas", number: 35, suit: "Arcanos Menores", img: "tarox/14copas_TarotX.png" },
+    { name: "1 de espadas", number: 36, suit: "Arcanos Menores", img: "tarox/01espadas_TarotX.png" },
+    { name: "2 de espadas", number: 37, suit: "Arcanos Menores", img: "tarox/02espadas_TarotX.png" },
+    { name: "3 de espadas", number: 38, suit: "Arcanos Menores", img: "tarox/03espadas_TarotX.png" },
+    { name: "4 de espadas", number: 39, suit: "Arcanos Menores", img: "tarox/04espadas_TarotX.png" },
+    { name: "5 de espadas", number: 40, suit: "Arcanos Menores", img: "tarox/05espadas_TarotX.png" },
+    { name: "6 de espadas", number: 41, suit: "Arcanos Menores", img: "tarox/06espadas_TarotX.png" },
+    { name: "7 de espadas", number: 42, suit: "Arcanos Menores", img: "tarox/07espadas_TarotX.png" },
+    { name: "8 de espadas", number: 43, suit: "Arcanos Menores", img: "tarox/08espadas_TarotX.png" },
+    { name: "9 de espadas", number: 44, suit: "Arcanos Menores", img: "tarox/09espadas_TarotX.png" },
+    { name: "10 de espadas", number: 45, suit: "Arcanos Menores", img: "tarox/10espadas_TarotX.png" },
+    { name: "11 de espadas", number: 46, suit: "Arcanos Menores", img: "tarox/11espadas_TarotX.png" },
+    { name: "12 de espadas", number: 47, suit: "Arcanos Menores", img: "tarox/12espadas_TarotX.png" },
+    { name: "13 de espadas", number: 48, suit: "Arcanos Menores", img: "tarox/13espadas_TarotX.png" },
+    { name: "14 de espadas", number: 49, suit: "Arcanos Menores", img: "tarox/14espadas_TarotX.png" },
+    { name: "1 de ouros", number: 50, suit: "Arcanos Menores", img: "tarox/01ouros_TarotX.png" },
+    { name: "2 de ouros", number: 51, suit: "Arcanos Menores", img: "tarox/02ouros_TarotX.png" },
+    { name: "3 de ouros", number: 52, suit: "Arcanos Menores", img: "tarox/03ouros_TarotX.png" },
+    { name: "4 de ouros", number: 53, suit: "Arcanos Menores", img: "tarox/04ouros_TarotX.png" },
+    { name: "5 de ouros", number: 54, suit: "Arcanos Menores", img: "tarox/05ouros_TarotX.png" },
+    { name: "6 de ouros", number: 55, suit: "Arcanos Menores", img: "tarox/06ouros_TarotX.png" },
+    { name: "7 de ouros", number: 56, suit: "Arcanos Menores", img: "tarox/07ouros_TarotX.png" },
+    { name: "8 de ouros", number: 57, suit: "Arcanos Menores", img: "tarox/08ouros_TarotX.png" },
+    { name: "9 de ouros", number: 58, suit: "Arcanos Menores", img: "tarox/09ouros_TarotX.png" },
+    { name: "10 de ouros", number: 59, suit: "Arcanos Menores", img: "tarox/10ouros_TarotX.png" },
+    { name: "11 de ouros", number: 60, suit: "Arcanos Menores", img: "tarox/11ouros_TarotX.png" },
+    { name: "12 de ouros", number: 61, suit: "Arcanos Menores", img: "tarox/12ouros_TarotX.png" },
+    { name: "13 de ouros", number: 62, suit: "Arcanos Menores", img: "tarox/13ouros_TarotX.png" },
+    { name: "14 de ouros", number: 63, suit: "Arcanos Menores", img: "tarox/14ouros_TarotX.png" },
+    { name: "1 de paus", number: 64, suit: "Arcanos Menores", img: "tarox/01paus_TarotX.png" },
+    { name: "2 de paus", number: 65, suit: "Arcanos Menores", img: "tarox/02paus_TarotX.png" },
+    { name: "3 de paus", number: 66, suit: "Arcanos Menores", img: "tarox/03paus_TarotX.png" },
+    { name: "4 de paus", number: 67, suit: "Arcanos Menores", img: "tarox/04paus_TarotX.png" },
+    { name: "5 de paus", number: 68, suit: "Arcanos Menores", img: "tarox/05paus_TarotX.png" },
+    { name: "6 de paus", number: 69, suit: "Arcanos Menores", img: "tarox/06paus_TarotX.png" },
+    { name: "7 de paus", number: 70, suit: "Arcanos Menores", img: "tarox/07paus_TarotX.png" },
+    { name: "8 de paus", number: 71, suit: "Arcanos Menores", img: "tarox/08paus_TarotX.png" },
+    { name: "9 de paus", number: 72, suit: "Arcanos Menores", img: "tarox/09paus_TarotX.png" },
+    { name: "10 de paus", number: 73, suit: "Arcanos Menores", img: "tarox/10paus_TarotX.png" },
+    { name: "11 de paus", number: 74, suit: "Arcanos Menores", img: "tarox/11paus_TarotX.png" },
+    { name: "12 de paus", number: 75, suit: "Arcanos Menores", img: "tarox/12paus_TarotX.png" },
+    { name: "13 de paus", number: 76, suit: "Arcanos Menores", img: "tarox/13paus_TarotX.png" },
+    { name: "14 de paus", number: 77, suit: "Arcanos Menores", img: "tarox/14paus_TarotX.png" },
+  // ... adicione todas as cartas aqui
+];
+
+let deck = [...tarotCards];
+
+function createCard(card) {
+  const cardDiv = document.createElement('div');
+  cardDiv.className = 'card';
+  cardDiv.innerHTML = `
+    <div class="card-inner">
+      <div class="card-front">
+        <img src="versotarot.png" alt="Carta verso">
+      </div>
+      <div class="card-back">
+        <img src="${card.img}" alt="${card.name} - Carta de Tarô" class="card-img">
+        <div class="card-title">${card.name}</div>
+      </div>
+    </div>
+  `;
+  
+  cardDiv.addEventListener('click', () => flipCard(cardDiv));
+  return cardDiv;
+}
+
+function flipCard(card) {
+  card.classList.toggle('flipped');
+}
+
+function shuffleCards() {
+  const deckElement = document.getElementById('deck');
+  deck = [...tarotCards].sort(() => Math.random() - 0.5);
+  deckElement.innerHTML = '';
+  deck.forEach(card => {
+    deckElement.appendChild(createCard(card));
+  });
+}
+
+function startReading() {
+  const readingArea = document.getElementById('readingArea');
+  readingArea.style.display = 'block';
+  const reading = document.getElementById('reading');
+  reading.innerHTML = '';
+  
+  // Seleciona o número de cartas aleatórias para uma leitura básica
+  const selectedCards = deck.slice(0, 78);
+  selectedCards.forEach((card, index) => {
+    const position = ['Passado', 'Presente', 'Futuro'][index];
+    reading.innerHTML += `
+      <div style="margin: 20px 0;">
+        <h3>${position}: ${card.name}</h3>
+        <img src="${card.img}" alt="${card.name}" style="width: 150px; height: 250px; object-fit: contain;">
+      </div>
+    `;
+  });
+}
+
+// Inicializa o deck
+document.addEventListener('DOMContentLoaded', () => {
+  shuffleCards();
+});
+</script>
+</body>
+</html>

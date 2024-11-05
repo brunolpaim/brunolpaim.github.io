@@ -1,0 +1,254 @@
+<html><head><base href="html"></base>
+<meta charset="UTF-8">
+<title>Omni Akashica - LenormandX</title>
+<style>
+:root {
+  --primary: #2c1810;
+  --secondary: #8b4513;
+  --accent: #daa520;
+  --light: #f5e6d3;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  min-height: 100vh;
+  background: var(--primary);
+  color: var(--light);
+  font-family: 'Georgia', serif;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+h1 {
+  color: var(--accent);
+  font-size: 2.5em;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  margin-bottom: 30px;
+}
+
+.deck {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.card {
+  position: relative;
+  width: 150px;
+  height: 250px;
+  perspective: 1000px;
+  cursor: pointer;
+  margin: 0 auto;
+}
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.card.flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-front, .card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.card-front {
+  background: linear-gradient(135deg, var(--secondary), var(--primary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--accent);
+}
+
+.card-back {
+  background: white;
+  transform: rotateY(180deg);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.card-title {
+  font-size: 0.8em;
+  color: var(--primary);
+  margin-top: 10px;
+}
+
+.back-pattern {
+  width: 100%;
+  height: 100%;
+}
+
+.controls {
+  margin: 20px 0;
+}
+
+button {
+  background: var(--accent);
+  color: var(--primary);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1.1em;
+  margin: 0 10px;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background: var(--light);
+  transform: translateY(-2px);
+}
+
+.reading-area {
+  margin-top: 30px;
+  padding: 20px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  display: none;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Omni Akashica - LenormandX</h1>
+  
+  <div class="controls">
+    <button onclick="shuffleCards()">Embaralhar</button>
+    <!--<button onclick="startReading()">Nova Leitura</button>-->
+  </div>
+  
+  <div class="deck" id="deck"></div>
+  
+  <div class="reading-area" id="readingArea">
+    <h2>Sua Leitura</h2>
+    <div id="reading"></div>
+  </div>
+</div>
+
+<script>
+const tarotCards = [
+    { name: "O Cavaleiro", number: 1, suit: "Cartas Ciganas", img: "lenormandx/01_o_cavaleiro.png" },
+    { name: "O Trevo", number: 2, suit: "Cartas Ciganas", img: "lenormandx/02_o_trevo.png" },
+    { name: "O Navio", number: 3, suit: "Cartas Ciganas", img: "lenormandx/03_o_navio.png" },
+    { name: "A Casa", number: 4, suit: "Cartas Ciganas", img: "lenormandx/04_a_casa.png" },
+    { name: "A Árvore", number: 5, suit: "Cartas Ciganas", img: "lenormandx/05_a_arvore.png" },
+    { name: "As Nuvens", number: 6, suit: "Cartas Ciganas", img: "lenormandx/06_as_nuvens.png" },
+    { name: "A Cobra", number: 7, suit: "Cartas Ciganas", img: "lenormandx/07_a_cobra.png" },
+    { name: "O Caixão", number: 8, suit: "Cartas Ciganas", img: "lenormandx/08_o_caixao.png" },
+    { name: "O Buquê", number: 9, suit: "Cartas Ciganas", img: "lenormandx/09_o_buque.png" },
+    { name: "A Foice", number: 10, suit: "Cartas Ciganas", img: "lenormandx/10_a_foice.png" },
+    { name: "O Chicote", number: 11, suit: "Cartas Ciganas", img: "lenormandx/11_o_chicote.png" },
+    { name: "Os Pássaros", number: 12, suit: "Cartas Ciganas", img: "lenormandx/12_os_passaros.png" },
+    { name: "A Criança", number: 13, suit: "Cartas Ciganas", img: "lenormandx/13_a_crianca.png" },
+    { name: "A Raposa", number: 14, suit: "Cartas Ciganas", img: "lenormandx/14_a_raposa.png" },
+    { name: "O Urso", number: 15, suit: "Cartas Ciganas", img: "lenormandx/15_o_urso.png" },
+    { name: "A Estrela", number: 16, suit: "Cartas Ciganas", img: "lenormandx/16_a_estrela.png" },
+    { name: "A Cegonha", number: 17, suit: "Cartas Ciganas", img: "lenormandx/17_a_cegonha.png" },
+    { name: "O Cachorro", number: 18, suit: "Cartas Ciganas", img: "lenormandx/18_o_cachorro.png" },
+    { name: "A Torre", number: 19, suit: "Cartas Ciganas", img: "lenormandx/19_a_torre.png" },
+    { name: "O Jardim", number: 20, suit: "Cartas Ciganas", img: "lenormandx/20_o_jardim.png" },
+    { name: "A Montanha", number: 21, suit: "Cartas Ciganas", img: "lenormandx/21_a_montanha.png" },
+    { name: "Os Caminhos", number: 22, suit: "Cartas Ciganas", img: "lenormandx/22_os_caminhos.png" },
+    { name: "Os Ratos", number: 23, suit: "Cartas Ciganas", img: "lenormandx/23_os_ratos.png" },
+    { name: "O Coração", number: 24, suit: "Cartas Ciganas", img: "lenormandx/24_o_coracao.png" },
+    { name: "O Anel", number: 25, suit: "Cartas Ciganas", img: "lenormandx/25_o_anel.png" },
+    { name: "O Livro", number: 26, suit: "Cartas Ciganas", img: "lenormandx/26_o_livro.png" },
+    { name: "A Carta", number: 27, suit: "Cartas Ciganas", img: "lenormandx/27_a_carta.png" },
+    { name: "O Homem", number: 28, suit: "Cartas Ciganas", img: "lenormandx/28_o_homem.png" },
+    { name: "A Mulher", number: 29, suit: "Cartas Ciganas", img: "lenormandx/29_a_mulher.png" },
+    { name: "Os Lírios", number: 30, suit: "Cartas Ciganas", img: "lenormandx/30_os_lirios.png" },
+    { name: "O Sol", number: 31, suit: "Cartas Ciganas", img: "lenormandx/31_o_sol.png" },
+    { name: "A Lua", number: 32, suit: "Cartas Ciganas", img: "lenormandx/32_a_lua.png" },
+    { name: "A Chave", number: 33, suit: "Cartas Ciganas", img: "lenormandx/33_a_chave.png" },
+    { name: "Os Peixes", number: 34, suit: "Cartas Ciganas", img: "lenormandx/34_os_peixes.png" },
+    { name: "A âncora", number: 35, suit: "Cartas Ciganas", img: "lenormandx/35_a_ancora.png" },
+    { name: "A Cruz", number: 36, suit: "Cartas Ciganas", img: "lenormandx/36_a_cruz.png" },
+  // ... adicione todas as cartas aqui
+];
+
+let deck = [...tarotCards];
+
+function createCard(card) {
+  const cardDiv = document.createElement('div');
+  cardDiv.className = 'card';
+  cardDiv.innerHTML = `
+    <div class="card-inner">
+      <div class="card-front">
+        <img src="versotarot.png" alt="Carta verso">
+      </div>
+      <div class="card-back">
+        <img src="${card.img}" alt="${card.name} - Carta de Tarô" class="card-img">
+        <div class="card-title">${card.name}</div>
+      </div>
+    </div>
+  `;
+  
+  cardDiv.addEventListener('click', () => flipCard(cardDiv));
+  return cardDiv;
+}
+
+function flipCard(card) {
+  card.classList.toggle('flipped');
+}
+
+function shuffleCards() {
+  const deckElement = document.getElementById('deck');
+  deck = [...tarotCards].sort(() => Math.random() - 0.5);
+  deckElement.innerHTML = '';
+  deck.forEach(card => {
+    deckElement.appendChild(createCard(card));
+  });
+}
+
+function startReading() {
+  const readingArea = document.getElementById('readingArea');
+  readingArea.style.display = 'block';
+  const reading = document.getElementById('reading');
+  reading.innerHTML = '';
+  
+  // Seleciona o número de cartas aleatórias para uma leitura básica
+  const selectedCards = deck.slice(0, 78);
+  selectedCards.forEach((card, index) => {
+    const position = ['Passado', 'Presente', 'Futuro'][index];
+    reading.innerHTML += `
+      <div style="margin: 20px 0;">
+        <h3>${position}: ${card.name}</h3>
+        <img src="${card.img}" alt="${card.name}" style="width: 150px; height: 250px; object-fit: contain;">
+      </div>
+    `;
+  });
+}
+
+// Inicializa o deck
+document.addEventListener('DOMContentLoaded', () => {
+  shuffleCards();
+});
+</script>
+</body>
+</html>
