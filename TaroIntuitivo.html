@@ -1,0 +1,228 @@
+<html><head><base href="." />
+<meta charset="UTF-8" />
+<title>Omni Akashica - Tarô Intuitivo</title>
+<style>
+body {
+    background: #1a1a2e;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: Arial, sans-serif;
+}
+
+.deck {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+    max-width: 1200px;
+}
+
+.card {
+    width: 150px;
+    height: 260px;
+    position: absolute;
+    cursor: move;
+    perspective: 1000px;
+    transition: transform 0.3s;
+}
+
+.card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+}
+
+.card.flipped .card-inner {
+    transform: rotateY(180deg);
+}
+
+.card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.card-front {
+    background: #c41e3a;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="%23a01830"/><path d="M0 20h40M20 0v40" stroke="%23c41e3a" stroke-width="1"/></svg>');
+    transform: rotateY(180deg);
+}
+
+.card-back {
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    text-align: center;
+    padding: 10px;
+}
+
+.card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.reset-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: #c41e3a;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.reset-button:hover {
+    background: #a01830;
+}
+</style>
+</head>
+<body>
+<div class="deck"></div>
+<button class="reset-button">Nova tiragem</button>
+
+<script>
+const tarotCards = [
+    { name: "Carta 1", number: 1, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_01.jpg" },
+    { name: "Carta 2", number: 2, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_02.jpg" },
+    { name: "Carta 3", number: 3, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_03.jpg" },
+    { name: "Carta 4", number: 4, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_04.jpg" },
+    { name: "Carta 5", number: 5, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_05.jpg" },
+    { name: "Carta 6", number: 6, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_06.jpg" },
+    { name: "Carta 7", number: 7, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_07.jpg" },
+    { name: "Carta 8", number: 8, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_08.jpg" },
+    { name: "Carta 9", number: 9, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_09.jpg" },
+    { name: "Carta 10", number: 10, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_10.jpg" },
+    { name: "Carta 11", number: 11, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_11.jpg" },
+    { name: "Carta 12", number: 12, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_12.jpg" },
+    { name: "Carta 13", number: 13, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_13.jpg" },
+    { name: "Carta 14", number: 14, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_14.jpg" },
+    { name: "Carta 15", number: 15, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_15.jpg" },
+    { name: "Carta 16", number: 16, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_16.jpg" },
+    { name: "Carta 17", number: 17, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_17.jpg" },
+    { name: "Carta 18", number: 18, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_18.jpg" },
+    { name: "Carta 19", number: 19, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_19.jpg" },
+    { name: "Carta 20", number: 20, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_20.jpg" },
+    { name: "Carta 21", number: 21, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_21.jpg" },
+    { name: "Carta 22", number: 22, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_22.jpg" },
+    { name: "Carta 23", number: 23, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_23.jpg" },
+    { name: "Carta 24", number: 24, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_24.jpg" },
+    { name: "Carta 25", number: 25, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_25.jpg" },
+    { name: "Carta 26", number: 26, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_26.jpg" },
+    { name: "Carta 27", number: 27, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_27.jpg" },
+    { name: "Carta 28", number: 28, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_28.jpg" },
+    { name: "Carta 29", number: 29, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_29.jpg" },
+    { name: "Carta 30", number: 30, suit: "Tarô Intuitivo", img: "tarointuitivo/carta_30.jpg" },
+
+    // ... adicione todas as cartas aqui
+];
+
+let selectedCard = null;
+let initialX = 0;
+let initialY = 0;
+let xOffset = 0;
+let yOffset = 0;
+
+function createCard(card, index) {
+    const cardElement = document.createElement('div');
+    cardElement.className = 'card';
+    cardElement.style.left = `${250 + (index * 20)}px`;
+    cardElement.style.top = `${110}px`;
+    
+    cardElement.innerHTML = `
+        <div class="card-inner">
+            <div class="card-front">
+                <img class="card-image" src="${card.img}" alt="${card.name}" draggable="false">
+            </div>
+            <div class="card-back">
+                <img src="versotarot.png" alt="Carta verso">
+            </div>
+        </div>
+    `;
+
+    cardElement.addEventListener('mousedown', dragStart);
+    cardElement.addEventListener('click', () => {
+        if (!cardElement.moving) {
+            cardElement.classList.toggle('flipped');
+        }
+    });
+
+    return cardElement;
+}
+
+function dragStart(e) {
+    selectedCard = e.target.closest('.card');
+    selectedCard.moving = false;
+    
+    initialX = e.clientX - xOffset;
+    initialY = e.clientY - yOffset;
+
+    if (selectedCard) {
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', dragEnd);
+    }
+}
+
+function drag(e) {
+    if (selectedCard) {
+        e.preventDefault();
+        selectedCard.moving = true;
+
+        const currentX = e.clientX - initialX;
+        const currentY = e.clientY - initialY;
+
+        xOffset = currentX;
+        yOffset = currentY;
+
+        setTranslate(currentX, currentY, selectedCard);
+    }
+}
+
+function setTranslate(xPos, yPos, el) {
+    el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+}
+
+function dragEnd() {
+    initialX = xOffset;
+    initialY = yOffset;
+    
+    setTimeout(() => {
+        if (selectedCard) {
+            selectedCard.moving = false;
+        }
+    }, 100);
+
+    document.removeEventListener('mousemove', drag);
+    document.removeEventListener('mouseup', dragEnd);
+}
+
+function shuffleCards() {
+    const deck = document.querySelector('.deck');
+    deck.innerHTML = '';
+    const shuffledCards = [...tarotCards]
+        .sort(() => Math.random() - 0.5)
+        .forEach((card, index) => {
+            const cardElement = createCard(card, index);
+            deck.appendChild(cardElement);
+        });
+}
+
+document.querySelector('.reset-button').addEventListener('click', shuffleCards);
+
+// Inicializar o deck
+shuffleCards();
+</script>
+</body>
+</html>

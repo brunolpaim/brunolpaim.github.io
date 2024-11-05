@@ -1,0 +1,233 @@
+<html><head><base href="." />
+<meta charset="UTF-8" />
+<title>Omni Akashica - Cartas Ciganas</title>
+<style>
+body {
+    background: #1a1a2e;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: Arial, sans-serif;
+}
+
+.deck {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+    max-width: 1200px;
+}
+
+.card {
+    width: 150px;
+    height: 260px;
+    position: absolute;
+    cursor: move;
+    perspective: 1000px;
+    transition: transform 0.3s;
+}
+
+.card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+}
+
+.card.flipped .card-inner {
+    transform: rotateY(180deg);
+}
+
+.card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.card-front {
+    background: #c41e3a;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="%23a01830"/><path d="M0 20h40M20 0v40" stroke="%23c41e3a" stroke-width="1"/></svg>');
+    transform: rotateY(180deg);
+}
+
+.card-back {
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    text-align: center;
+    padding: 10px;
+}
+
+.card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.reset-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: #c41e3a;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.reset-button:hover {
+    background: #a01830;
+}
+</style>
+</head>
+<body>
+<div class="deck"></div>
+<button class="reset-button">Nova tiragem</button>
+
+<script>
+const tarotCards = [
+    { name: "O Cavaleiro", number: 1, suit: "Cartas Ciganas", img: "lenormandlux/01lux_gipsy.png" },
+    { name: "O Trevo", number: 2, suit: "Cartas Ciganas", img: "lenormandlux/02lux_gipsy.png" },
+    { name: "O Navio", number: 3, suit: "Cartas Ciganas", img: "lenormandlux/03lux_gipsy.png" },
+    { name: "A Casa", number: 4, suit: "Cartas Ciganas", img: "lenormandlux/04lux_gipsy.png" },
+    { name: "A Árvore", number: 5, suit: "Cartas Ciganas", img: "lenormandlux/05lux_gipsy.png" },
+    { name: "As Nuvens", number: 6, suit: "Cartas Ciganas", img: "lenormandlux/06lux_gipsy.png" },
+    { name: "A Cobra", number: 7, suit: "Cartas Ciganas", img: "lenormandlux/07lux_gipsy.png" },
+    { name: "O Caixão", number: 8, suit: "Cartas Ciganas", img: "lenormandlux/08lux_gipsy.png" },
+    { name: "O Buquê", number: 9, suit: "Cartas Ciganas", img: "lenormandlux/09lux_gipsy.png" },
+    { name: "A Foice", number: 10, suit: "Cartas Ciganas", img: "lenormandlux/10lux_gipsy.png" },
+    { name: "O Chicote", number: 11, suit: "Cartas Ciganas", img: "lenormandlux/11lux_gipsy.png" },
+    { name: "Os Pássaros", number: 12, suit: "Cartas Ciganas", img: "lenormandlux/12lux_gipsy.png" },
+    { name: "A Criança", number: 13, suit: "Cartas Ciganas", img: "lenormandlux/13lux_gipsy.png" },
+    { name: "A Raposa", number: 14, suit: "Cartas Ciganas", img: "lenormandlux/14lux_gipsy.png" },
+    { name: "O Urso", number: 15, suit: "Cartas Ciganas", img: "lenormandlux/15lux_gipsy.png" },
+    { name: "A Estrela", number: 16, suit: "Cartas Ciganas", img: "lenormandlux/16lux_gipsy.png" },
+    { name: "A Cegonha", number: 17, suit: "Cartas Ciganas", img: "lenormandlux/17lux_gipsy.png" },
+    { name: "O Cachorro", number: 18, suit: "Cartas Ciganas", img: "lenormandlux/18lux_gipsy.png" },
+    { name: "A Torre", number: 19, suit: "Cartas Ciganas", img: "lenormandlux/19lux_gipsy.png" },
+    { name: "O Jardim", number: 20, suit: "Cartas Ciganas", img: "lenormandlux/20lux_gipsy.png" },
+    { name: "A Montanha", number: 21, suit: "Cartas Ciganas", img: "lenormandlux/21lux_gipsy.png" },
+    { name: "Os Caminhos", number: 22, suit: "Cartas Ciganas", img: "lenormandlux/22lux_gipsy.png" },
+    { name: "Os Ratos", number: 23, suit: "Cartas Ciganas", img: "lenormandlux/23lux_gipsy.png" },
+    { name: "O Coração", number: 24, suit: "Cartas Ciganas", img: "lenormandlux/24lux_gipsy.png" },
+    { name: "O Anel", number: 25, suit: "Cartas Ciganas", img: "lenormandlux/25lux_gipsy.png" },
+    { name: "O Livro", number: 26, suit: "Cartas Ciganas", img: "lenormandlux/26lux_gipsy.png" },
+    { name: "A Carta", number: 27, suit: "Cartas Ciganas", img: "lenormandlux/27lux_gipsy.png" },
+    { name: "O Homem", number: 28, suit: "Cartas Ciganas", img: "lenormandlux/28lux_gipsy.png" },
+    { name: "A Mulher", number: 29, suit: "Cartas Ciganas", img: "lenormandlux/29lux_gipsy.png" },
+    { name: "Os Lírios", number: 30, suit: "Cartas Ciganas", img: "lenormandlux/30lux_gipsy.png" },
+    { name: "O Sol", number: 31, suit: "Cartas Ciganas", img: "lenormandlux/31lux_gipsy.png" },
+    { name: "A Lua", number: 32, suit: "Cartas Ciganas", img: "lenormandlux/32lux_gipsy.png" },
+    { name: "A Chave", number: 33, suit: "Cartas Ciganas", img: "lenormandlux/33lux_gipsy.png" },
+    { name: "Os Peixes", number: 34, suit: "Cartas Ciganas", img: "lenormandlux/34lux_gipsy.png" },
+    { name: "A âncora", number: 35, suit: "Cartas Ciganas", img: "lenormandlux/35lux_gipsy.png" },
+    { name: "A Cruz", number: 36, suit: "Cartas Ciganas", img: "lenormandlux/36lux_gipsy.png" },
+    // ... adicione todas as cartas aqui
+];
+
+let selectedCard = null;
+let initialX = 0;
+let initialY = 0;
+let xOffset = 0;
+let yOffset = 0;
+
+function createCard(card, index) {
+    const cardElement = document.createElement('div');
+    cardElement.className = 'card';
+    cardElement.style.left = `${250 + (index * 20)}px`;
+    cardElement.style.top = `${110}px`;
+    
+    cardElement.innerHTML = `
+        <div class="card-inner">
+            <div class="card-front">
+                <img class="card-image" src="${card.img}" alt="${card.name}" draggable="false">
+            </div>
+            <div class="card-back">
+                <img src="versotarot.png" alt="Carta verso">
+            </div>
+        </div>
+    `;
+
+    cardElement.addEventListener('mousedown', dragStart);
+    cardElement.addEventListener('click', () => {
+        if (!cardElement.moving) {
+            cardElement.classList.toggle('flipped');
+        }
+    });
+
+    return cardElement;
+}
+
+function dragStart(e) {
+    selectedCard = e.target.closest('.card');
+    selectedCard.moving = false;
+    
+    initialX = e.clientX - xOffset;
+    initialY = e.clientY - yOffset;
+
+    if (selectedCard) {
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', dragEnd);
+    }
+}
+
+function drag(e) {
+    if (selectedCard) {
+        e.preventDefault();
+        selectedCard.moving = true;
+
+        const currentX = e.clientX - initialX;
+        const currentY = e.clientY - initialY;
+
+        xOffset = currentX;
+        yOffset = currentY;
+
+        setTranslate(currentX, currentY, selectedCard);
+    }
+}
+
+function setTranslate(xPos, yPos, el) {
+    el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+}
+
+function dragEnd() {
+    initialX = xOffset;
+    initialY = yOffset;
+    
+    setTimeout(() => {
+        if (selectedCard) {
+            selectedCard.moving = false;
+        }
+    }, 100);
+
+    document.removeEventListener('mousemove', drag);
+    document.removeEventListener('mouseup', dragEnd);
+}
+
+function shuffleCards() {
+    const deck = document.querySelector('.deck');
+    deck.innerHTML = '';
+    const shuffledCards = [...tarotCards]
+        .sort(() => Math.random() - 0.5)
+        .forEach((card, index) => {
+            const cardElement = createCard(card, index);
+            deck.appendChild(cardElement);
+        });
+}
+
+document.querySelector('.reset-button').addEventListener('click', shuffleCards);
+
+// Inicializar o deck
+shuffleCards();
+</script>
+</body>
+</html>
