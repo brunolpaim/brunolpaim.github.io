@@ -1,0 +1,296 @@
+<html><head><base href="html"></base>
+<meta charset="UTF-8">
+<title>Omni Akashica - Tarô Rider Waite</title>
+<style>
+:root {
+  --primary: #2c1810;
+  --secondary: #8b4513;
+  --accent: #daa520;
+  --light: #f5e6d3;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  min-height: 100vh;
+  background: var(--primary);
+  color: var(--light);
+  font-family: 'Georgia', serif;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+h1 {
+  color: var(--accent);
+  font-size: 2.5em;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  margin-bottom: 30px;
+}
+
+.deck {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.card {
+  position: relative;
+  width: 150px;
+  height: 250px;
+  perspective: 1000px;
+  cursor: pointer;
+  margin: 0 auto;
+}
+
+.card-inner {
+  position: relative;
+  width: 85%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.card.flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-front, .card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.card-front {
+  background: linear-gradient(135deg, var(--secondary), var(--primary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--accent);
+}
+
+.card-back {
+  background: white;
+  transform: rotateY(180deg);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.card-title {
+  font-size: 0.8em;
+  color: var(--primary);
+  margin-top: 10px;
+}
+
+.back-pattern {
+  width: 100%;
+  height: 100%;
+}
+
+.controls {
+  margin: 20px 0;
+}
+
+button {
+  background: var(--accent);
+  color: var(--primary);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1.1em;
+  margin: 0 10px;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background: var(--light);
+  transform: translateY(-2px);
+}
+
+.reading-area {
+  margin-top: 30px;
+  padding: 20px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  display: none;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Omni Akashica - Tarô Rider Waite</h1>
+  
+  <div class="controls">
+    <button onclick="shuffleCards()">Embaralhar</button>
+    <!--<button onclick="startReading()">Nova Leitura</button>-->
+  </div>
+  
+  <div class="deck" id="deck"></div>
+  
+  <div class="reading-area" id="readingArea">
+    <h2>Sua Leitura</h2>
+    <div id="reading"></div>
+  </div>
+</div>
+
+<script>
+const tarotCards = [
+  { name: "O Louco", number: 0, suit: "Arcanos Maiores", image: "https://www.sacred-texts.com/tarot/pkt/img/ar00.jpg" },
+  { name: "O Mago", number: 1, suit: "Arcanos Maiores", image: "https://www.sacred-texts.com/tarot/pkt/img/ar01.jpg" },
+  { name: "A Sacerdotisa", number: 2, suit: "Arcanos Maiores", image: "https://www.sacred-texts.com/tarot/pkt/img/ar02.jpg" },
+  { name: "A Imperatriz", number: 3, suit: "Arcanos Maiores", image: "https://www.sacred-texts.com/tarot/pkt/img/ar03.jpg" },
+  { name: "O Imperador", number: 4, suit: "Arcanos Maiores", image: "https://www.sacred-texts.com/tarot/pkt/img/ar04.jpg" },
+  { name: "O Hierofante", number: 5, suit: "Arcanos Maiores", image: "https://www.sacred-texts.com/tarot/pkt/img/ar05.jpg" },
+  { name: "Os Enamorados", number: 6, suit: "Arcanos Maiores", image: "https://www.sacred-texts.com/tarot/pkt/img/ar06.jpg" },
+  { name: "O Carro", number: 7, suit: "Arcanos Maiores", image: "https://www.sacred-texts.com/tarot/pkt/img/ar07.jpg" },
+  { name: "A Justiça", number: 8, suit: "Arcanos Maiores", image: "https://www.sacred-texts.com/tarot/pkt/img/ar08.jpg" },
+  { name: "O Eremita", number: 9, suit: "Arcanos Maiores", image: "https://www.sacred-texts.com/tarot/pkt/img/ar09.jpg" },
+  { name: "A Roda da Fortuna", number: 10, suit: "Arcanos Maiores", image: "https://www.sacred-texts.com/tarot/pkt/img/ar10.jpg" },
+  { name: "a Força", number: 11, suit: "Arcanos Maiores", image: "https://www.sacred-texts.com/tarot/pkt/img/ar11.jpg" },
+  { name: "O Enforcado", number: 12, suit: "Arcanos Maiores", image: "https://www.sacred-texts.com/tarot/pkt/img/ar12.jpg" },
+  { name: "A Morte", number: 13, suit: "Arcanos Maiores", image: "https://www.sacred-texts.com/tarot/pkt/img/ar13.jpg" },
+  { name: "A temperança", number: 14, suit: "Arcanos Maiores", image: "https://www.sacred-texts.com/tarot/pkt/img/ar14.jpg" },
+  { name: "O Diabo", number: 15, suit: "Arcanos Maiores", image: "https://www.sacred-texts.com/tarot/pkt/img/ar15.jpg" },
+  { name: "A Torre", number: 16, suit: "Arcanos Maiores", image: "https://www.sacred-texts.com/tarot/pkt/img/ar16.jpg" },
+  { name: "A Estrela", number: 17, suit: "Arcanos Maiores", image: "https://www.sacred-texts.com/tarot/pkt/img/ar17.jpg" },
+  { name: "A Lua", number: 18, suit: "Arcanos Maiores", image: "https://www.sacred-texts.com/tarot/pkt/img/ar18.jpg" },
+  { name: "O Sol", number: 19, suit: "Arcanos Maiores", image: "https://www.sacred-texts.com/tarot/pkt/img/ar19.jpg" },
+  { name: "O Julgamento", number: 20, suit: "Arcanos Maiores", image: "https://www.sacred-texts.com/tarot/pkt/img/ar20.jpg" },
+  { name: "O Mundo", number: 21, suit: "Arcanos Maiores", image: "https://www.sacred-texts.com/tarot/pkt/img/ar21.jpg" },
+  { name: "1 de copas", number: 22, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/cuac.jpg" },
+    { name: "2 de copas", number: 23, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/cu02.jpg" },
+    { name: "3 de copas", number: 24, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/cu03.jpg" },
+    { name: "4 de copas", number: 25, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/cu04.jpg" },
+    { name: "5 de copas", number: 26, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/cu05.jpg" },
+    { name: "6 de copas", number: 27, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/cu06.jpg" },
+    { name: "7 de copas", number: 28, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/cu07.jpg" },
+    { name: "8 de copas", number: 29, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/cu08.jpg" },
+    { name: "9 de copas", number: 30, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/cu09.jpg" },
+    { name: "10 de copas", number: 31, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/cu10.jpg" },
+    { name: "Valete de copas", number: 32, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/cupa.jpg" },
+    { name: "Cavaleiro de copas", number: 33, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/cukn.jpg" },
+    { name: "Rainha de copas", number: 34, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/cuqu.jpg" },
+    { name: "Rei de copas", number: 35, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/cuki.jpg" },
+    { name: "1 de espadas", number: 36, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/swac.jpg" },
+    { name: "2 de espadas", number: 37, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/sw02.jpg" },
+    { name: "3 de espadas", number: 38, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/sw03.jpg" },
+    { name: "4 de espadas", number: 39, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/sw04.jpg" },
+    { name: "5 de espadas", number: 40, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/sw05.jpg" },
+    { name: "6 de espadas", number: 41, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/sw06.jpg" },
+    { name: "7 de espadas", number: 42, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/sw07.jpg" },
+    { name: "8 de espadas", number: 43, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/sw08.jpg" },
+    { name: "9 de espadas", number: 44, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/sw09.jpg" },
+    { name: "10 de espadas", number: 45, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/sw10.jpg" },
+    { name: "Valete de espadas", number: 46, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/swpa.jpg" },
+    { name: "Cavaleiro de espadas", number: 47, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/swkn.jpg" },
+    { name: "Rainha de espadas", number: 48, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/swqu.jpg" },
+    { name: "Rei de espadas", number: 49, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/swki.jpg" },
+    { name: "1 de ouros", number: 50, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/peac.jpg" },
+    { name: "2 de ouros", number: 51, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/pe02.jpg" },
+    { name: "3 de ouros", number: 52, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/pe03.jpg" },
+    { name: "4 de ouros", number: 53, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/pe04.jpg" },
+    { name: "5 de ouros", number: 54, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/pe05.jpg" },
+    { name: "6 de ouros", number: 55, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/pe06.jpg" },
+    { name: "7 de ouros", number: 56, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/pe07.jpg" },
+    { name: "8 de ouros", number: 57, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/pe08.jpg" },
+    { name: "9 de ouros", number: 58, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/pe09.jpg" },
+    { name: "10 de ouros", number: 59, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/pe10.jpg" },
+    { name: "Valete de ouros", number: 60, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/pepa.jpg" },
+    { name: "Cavaleiro de ouros", number: 61, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/pekn.jpg" },
+    { name: "Rainha de ouros", number: 62, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/pequ.jpg" },
+    { name: "Rei de ouros", number: 63, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/peki.jpg" },
+    { name: "1 de paus", number: 64, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/waac.jpg" },
+    { name: "2 de paus", number: 65, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/wa02.jpg" },
+    { name: "3 de paus", number: 66, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/wa03.jpg" },
+    { name: "4 de paus", number: 67, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/wa04.jpg" },
+    { name: "5 de paus", number: 68, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/wa05.jpg" },
+    { name: "6 de paus", number: 69, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/wa06.jpg" },
+    { name: "7 de paus", number: 70, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/wa07.jpg" },
+    { name: "8 de paus", number: 71, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/wa08.jpg" },
+    { name: "9 de paus", number: 72, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/wa09.jpg" },
+    { name: "10 de paus", number: 73, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/wa10.jpg" },
+    { name: "Valete de paus", number: 74, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/wapa.jpg" },
+    { name: "Cavaleiro de paus", number: 75, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/wakn.jpg" },
+    { name: "Rainha de paus", number: 76, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/waqu.jpg" },
+    { name: "Rei de paus", number: 77, suit: "Arcanos Menores", image: "https://www.sacred-texts.com/tarot/pkt/img/waki.jpg" },
+  // ... adicione todas as cartas aqui
+];
+
+let deck = [...tarotCards];
+
+function createCard(card) {
+  const cardDiv = document.createElement('div');
+  cardDiv.className = 'card';
+  cardDiv.innerHTML = `
+    <div class="card-inner">
+      <div class="card-front">
+        <img src="versotarot.png" alt="Carta verso">
+      </div>
+      <div class="card-back">
+        <img src="${card.image}" alt="${card.name} - Carta de Tarô" class="card-image">
+        <div class="card-title">${card.name}</div>
+      </div>
+    </div>
+  `;
+  
+  cardDiv.addEventListener('click', () => flipCard(cardDiv));
+  return cardDiv;
+}
+
+function flipCard(card) {
+  card.classList.toggle('flipped');
+}
+
+function shuffleCards() {
+  const deckElement = document.getElementById('deck');
+  deck = [...tarotCards].sort(() => Math.random() - 0.5);
+  deckElement.innerHTML = '';
+  deck.forEach(card => {
+    deckElement.appendChild(createCard(card));
+  });
+}
+
+function startReading() {
+  const readingArea = document.getElementById('readingArea');
+  readingArea.style.display = 'block';
+  const reading = document.getElementById('reading');
+  reading.innerHTML = '';
+  
+  // Seleciona o número de cartas aleatórias para uma leitura básica
+  const selectedCards = deck.slice(0, 78);
+  selectedCards.forEach((card, index) => {
+    const position = ['Passado', 'Presente', 'Futuro'][index];
+    reading.innerHTML += `
+      <div style="margin: 20px 0;">
+        <h3>${position}: ${card.name}</h3>
+        <img src="${card.image}" alt="${card.name}" style="width: 150px; height: 250px; object-fit: contain;">
+      </div>
+    `;
+  });
+}
+
+// Inicializa o deck
+document.addEventListener('DOMContentLoaded', () => {
+  shuffleCards();
+});
+</script>
+</body>
+</html>
